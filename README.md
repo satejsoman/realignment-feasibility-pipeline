@@ -9,45 +9,25 @@
 # Architecture
 
 ## Overview
+The centerpiece of the architecture is a managed PostgreSQL database (on Amazon RDS). The reason for this is that.
 
 ## Details: Upload
+The current data, as a result of the Million Neighborhoods Project, is stored on the `/project2` netowr
 
 ## Details: Hydration
+First, the PostGIS extensions, in-band permissions, and associated tables must be created (`src/hydrate/setup.sql`). Since PostGIS is installed but not activated, the extension must be installed and proper permissions need to be granted to the RDS superuser for management and configuration purposes. We must also set up our tables and schema as needed so that our code to transfer data from S3 has a proper destination.
 
--`setup.sql`
-```SQL
--- sanity check 
-select current_user;
+There are 2 relevant tables: `buildings` and `blocks`, with the following schemas:
 
--- create extensions
-create extension postgis;
-create extension fuzzystrmatch;
-create extension postgis_topology;
+Note that the presence of a `geom` column means the R-tree spatial indices mentioned above will be created automatically.
 
--- in-band permissions
-alter schema topology owner to rds_superuser;
+Next, the out-of-band permissions need to be configured by setting the RDS VPC's in-bound connection rules to accept traffic from the local machine (for debugging purposes; spinning up an EMR cluster in the same VPC as the database instance will automatically be able to make in-bound connections to the database.)
 
-CREATE FUNCTION exec(text) returns text language plpgsql volatile AS $f$ BEGIN EXECUTE $1; RETURN $1; END; $f$;
-
-SELECT exec('ALTER TABLE ' || quote_ident(s.nspname) || '.' || quote_ident(s.relname) || ' OWNER TO rds_superuser;')
-  FROM (
-    SELECT nspname, relname
-    FROM pg_class c JOIN pg_namespace n ON (c.relnamespace = n.oid) 
-    WHERE nspname in ('topology') AND
-    relkind IN ('r','S','v') ORDER BY relkind = 'S')
-s; 
-
--- test 
-select topology.createtopology('my_new_topo',26986,0.5);
-
--- make like a carpenter and build some tables 
-create table blocks; 
-create table buildings;
-
--- set up geospatial indices 
-```
+Finally, an EMR job is spun up to hydrate each table. For each 
 
 ## Details: Querying
+
+Granted, multiple packages exist to make the entire Lambda process much more streamlined. However, a major limitation of packages like `pywren` at time of writing is the inflexibility 
 
 # Resources
 - https://stackoverflow.com/questions/34758338/how-to-populate-a-postgresql-database-with-mrjob-and-hadoop
