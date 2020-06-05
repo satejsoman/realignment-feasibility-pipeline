@@ -14,8 +14,7 @@
 
 ## Details: Hydration
 
-`setup.sql`
-```SQL
+`setup.sql````SQL
 -- sanity check 
 select current_user;
 
