@@ -17,15 +17,13 @@ The current data, as a result of the Million Neighborhoods Project, is stored on
 #### Hydration Stage
 First, the PostGIS extensions, in-band permissions, and associated tables must be created (`src/hydrate/setup.sql`). Since PostGIS is installed but not activated, the extension must be installed and proper permissions need to be granted to the RDS superuser for management and configuration purposes. We must also set up our tables and schema as needed so that our code to transfer data from S3 has a proper destination.
 
-There are 2 relevant tables: `buildings` and `blocks`, with the following schemas:
-
-Note that the presence of a `geom` column means the R-tree spatial indices mentioned above will be created automatically.
+There are 2 relevant tables: `buildings` and `blocks`, with the following schemas. These tables do not need to be created explicitly in our setup script because our hydration EMR job can handle creating them and the R-tree indices automatically if they do not exist.
 
 Next, the out-of-band permissions need to be configured by setting the RDS VPC's in-bound connection rules to accept traffic from the local machine (for debugging purposes; spinning up an EMR cluster in the same VPC as the database instance will automatically be able to make in-bound connections to the database.)
 
 ![](./img/vpc.png)
 
-Finally, an EMR job is spun up to hydrate each table. For each 
+Finally, an EMR job is spun up to hydrate each table. For each country in our dataset, we get a list of S3 filepaths and create a GeoPandas dataframe from each filepath. 
 
 #### Querying Stage
 
