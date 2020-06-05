@@ -2,7 +2,7 @@
 <h6 align="right">MACS 30123: Large-Scale Computing for the Social Sciences | Spring 2020</h6>
 
 <h2 align="center">Per-Block Building Capacity</h2>
-<h2 align="center"><i>Heuristics for Targeted Urban Infrastructure Investment</i></h2>
+<h4 align="center"><i>Heuristics for Targeted Urban Infrastructure Investment</i></h4>
 
 ### Background 
 
