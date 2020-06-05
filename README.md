@@ -23,6 +23,8 @@ Note that the presence of a `geom` column means the R-tree spatial indices menti
 
 Next, the out-of-band permissions need to be configured by setting the RDS VPC's in-bound connection rules to accept traffic from the local machine (for debugging purposes; spinning up an EMR cluster in the same VPC as the database instance will automatically be able to make in-bound connections to the database.)
 
+![](./src/vpc.png)
+
 Finally, an EMR job is spun up to hydrate each table. For each 
 
 ## Details: Querying
