@@ -4,6 +4,20 @@
 <h1 align="center">Per-Block Building Capacity</h1>
 <h2 align="center">Heuristics for Targeted Urban Infrastructure Investment</h2>
 
+# Background 
+
+# Architecture
+
+## Overview
+
+## Details: Upload
+
+## Details: Hydration
+
+`sample code`
+
+## Details: Querying
+
 # Resources
 - https://stackoverflow.com/questions/34758338/how-to-populate-a-postgresql-database-with-mrjob-and-hadoop
 - https://www.youtube.com/watch?v=BzjeZFej_0k
