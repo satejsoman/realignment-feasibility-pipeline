@@ -19,6 +19,7 @@ docutils==0.15.2
 enum34==1.1.10
 Fiona==1.8.13.post1
 flaky==3.6.1
+GeoAlchemy2==0.8.3
 geopandas==0.7.0
 glob2==0.7
 ipython==7.15.0
