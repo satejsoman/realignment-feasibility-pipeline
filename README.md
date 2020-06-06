@@ -5,6 +5,7 @@
 <h4 align="center"><i>Heuristics for Targeted Urban Infrastructure Investment</i></h4>
 
 ### Background 
+Community-driven infrastructure investment in the developing world has focused on reacting to deficits in the formal physical infrastructure by implementing in-situ 
 
 ### Architecture
 
@@ -12,12 +13,16 @@
 The centerpiece of the architecture is a managed PostgreSQL database (on Amazon RDS). The reason for this is that.
 
 #### Upload Stage
-The current data, as a result of the Million Neighborhoods Project, is stored on the `/project2` networked filesystem.
+The current data, as a result of the Million Neighborhoods Project, is stored on the `/project2` networked filesystem. I used the `awscli` command line tool to recursively upload data for each country in Africa to S3. I chose the command-line approach rather than using the `boto` library in a Python script because the `awscli` utility offers two key features that optimized both time and resource utilization:
+
+1. A recursive file traversal option in the `s3 cp` subcommand, which removed the need for me to manually traverse the filesystem to find all files to upload. 
+
+2. A connection/pooling reuse system, which optimized bandwidth usage so I did not have to spin up a new connection for each of the thousands of files in my dataset.
 
 #### Hydration Stage
 First, the PostGIS extensions, in-band permissions, and associated tables must be created (`src/hydrate/setup.sql`). Since PostGIS is installed but not activated, the extension must be installed and proper permissions need to be granted to the RDS superuser for management and configuration purposes. We must also set up our tables and schema as needed so that our code to transfer data from S3 has a proper destination.
 
-There are 2 relevant tables: `buildings` and `blocks`, with the following schemas. These tables do not need to be created explicitly in our setup script because our hydration EMR job can handle creating them and the R-tree indices automatically if they do not exist.
+There are 2 relevant tables: `buildings` and `blocks`, containing the geometry for each object type. These tables do not need to be created explicitly in our setup script because our hydration EMR job can handle creating them and the R-tree indices automatically if they do not exist.
 
 Next, the out-of-band permissions need to be configured by setting the RDS VPC's in-bound connection rules to accept traffic from the local machine (for debugging purposes; spinning up an EMR cluster in the same VPC as the database instance will automatically be able to make in-bound connections to the database.)
 
