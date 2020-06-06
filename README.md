@@ -39,7 +39,7 @@ The current data, as a result of the Million Neighborhoods Project, is stored on
 2. A connection/pooling reuse system, which optimized bandwidth usage so I did not have to spin up a new connection for each of the thousands of files in my dataset.
 
 #### Hydration Stage
-First, the PostGIS extensions, in-band permissions, and associated tables must be created (`src/hydrate/setup.sql`). Since PostGIS is installed but not activated, the extension must be installed and proper permissions need to be granted to the RDS superuser for management and configuration purposes. This in turn ensures the tables and schema are set up as needed so that our code to transfer data from S3 has a proper destination.
+First, the PostGIS extensions, in-band permissions, and associated tables must be created (`src/hydrate/setup.sql`). Since PostGIS is available but not activated, the extension must be installed and proper permissions need to be granted to the RDS superuser for management and configuration purposes. This in turn ensures the tables and schema are set up as needed so that our code to transfer data from S3 has a proper destination.
 
 There are 2 relevant tables: `buildings` and `blocks`, containing the geometry for each object type. These tables do not need to be created explicitly in our setup script because our hydration EMR job can handle creating both the tables and the R-tree indices automatically if they do not exist.
 
