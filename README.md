@@ -70,7 +70,7 @@ The below is an analysis of every street block in Freetown, Sierra Leone. The re
 
 ![](./img/freetown.png)
 
-I hope to apply this analysis to countries with different land-use density profiles, such as Lesotho and Nairobi, in the future.
+I hope to apply this analysis to countries with different land-use density profiles, such as Lesotho and Kenya, in the future.
 
 
 ### Resources
