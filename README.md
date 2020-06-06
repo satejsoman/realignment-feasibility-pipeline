@@ -5,12 +5,31 @@
 <h4 align="center"><i>Heuristics for Targeted Urban Infrastructure Investment</i></h4>
 
 ### Background 
-Community-driven infrastructure investment in the developing world has focused on reacting to deficits in the formal physical infrastructure by implementing in-situ 
+Community-driven infrastructure investment in the developing world has focused on reacting to deficits in the formal physical infrastructure by implementing in-situ upgrades (e.g. moving buildings within existing street blocks, or creating informal paths to increase the access of inhabitants to formal infrastructure. However, this approach has limits in cases where the formal infrastructure (roads, power, sewage, sanitation, etc.) is insufficiently developed to provide for an adequate quality of life. In these cases, it is useful to have a heuristic to distinguish between blocks in which in-situ approaches are appropriate and those in which further formal investment is needed.
+
+One potential heuristic is per-block building capacity. In short, if all the buildings in a block can be aligned to the edges of a street block, there is enough physical space in the block to provide formal infrastructure needs for the inhabitants of the enclosed buildings. To calculate this, we sum the maximum linear dimension of each building footprint and consider a block a candidate for infrastructure investment if this sum exceeds the perimeter of the enclosing street block.
+
+This calculation, while straightforward in theory, is difficult to implement in practice due to data fragmentation. Building footprints, depending on the source, are available in a number of different geospatial file formats. For example, OpenStreetMap provides downloadable Protocol Buffer files for its geospatial vector layers, while private providers often provide data in the form of an ESRI Shapefile. The block geometry data are in CSV formats with geometry described using the Well-Known Text (WKT) protocol. 
+
+![](./img/data.png)
+
+These data formats are incompatible with each other and need to be converted to a common format in order to run the comparison calculations described above.
+
+However, in-memory or on-disk file flattening approaches do not lend themselves to analysis because queries on subsets of the data are expensive.
+
+The solution is to us a geospatial database for several reasons.
+
+1. Geospatial databases offer a common data storage format for data in heterogenous and incompatible formats.
+
+2. A database solution offers a better persistence story for data fragmented into different sets of files.
+
+3. A geospatial database offers R-tree indices to speed up the necessary geometric intersection calculations, and regular B-tree indices to allow for subsetting the data in an efficient way.
 
 ### Architecture
+![](./img/architecture.png)
 
 #### Overview
-The centerpiece of the architecture is a managed PostgreSQL database (on Amazon RDS). The reason for this is that.
+The centerpiece of the architecture is a managed PostgreSQL database (on Amazon RDS). This managed database solution offers a PostGIS extension that implements the geospatial primitives necessary for this analysis. The raw data is uploaded to S3 using the AWS command-line tools, and then seeded into the database via Elastic MapReduce. The data is then queried by a series of AWS Lambda invocations, as described in the following sections.
 
 #### Upload Stage
 The current data, as a result of the Million Neighborhoods Project, is stored on the `/project2` networked filesystem. I used the `awscli` command line tool to recursively upload data for each country in Africa to S3. I chose the command-line approach rather than using the `boto` library in a Python script because the `awscli` utility offers two key features that optimized both time and resource utilization:
@@ -32,7 +51,7 @@ Finally, an EMR job is spun up to hydrate each table. For each country in our da
 
 #### Querying Stage
 
-Because there was very little state 
+The implementation of the feasibility metric is below. This calculation could be done server-side, but the implementation is cleaner and easier to express in client-side high-level code rather than with SQL clauses. 
 
 ```Python
 def is_feasible(block: shapely.geometry.Polygon, buildings: Sequence[shapely.geometry.Polygon]) -> bool:
@@ -40,7 +59,7 @@ def is_feasible(block: shapely.geometry.Polygon, buildings: Sequence[shapely.geo
     return block.length > sum(min(shapely.geometry.LineString(rectangle[i:i+2]).length for i in range(len(rectangle)-1)) for rectangle in min_area_rects)
 ```
 
-However, two constraints make the use of the `boto` API the better choice.
+The implementation has almost no per-block state; all one requires is an identifier for each block in order to query the blocks table to get the geometry and then intersect that geometry against the geometries in the buildings table. This minimal state indicates a serverless approach to distributing this query is a workable solution. AWS Lambda has a number of client-side management frameworks, such as `pywren`, but I chose to use the lower-level `boto` API to manually distribute and schedule invocations due to two constraints:
 
 1. *VPC firewalls.* Despite setting out-of-band permissions on the database by adding firewall setting entries, I was unable to make database connections from `pywren` calls to my RDS instance. With a manually-specified Lambda, VPC configurations and IAM roles can be configured with greater flexibility, as was needed in this project. Specifically, I had to add the `AWSLambdaVPCAccessExecutionRole` to my Lambda to get RDS calls to work.
 
