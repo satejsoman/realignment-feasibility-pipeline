@@ -17,7 +17,7 @@ These data formats are incompatible with each other and need to be converted to 
 
 However, in-memory or on-disk file flattening approaches do not lend themselves to analysis because queries on subsets of the data are expensive.
 
-The solution is to us a geospatial database for several reasons.
+The ideal solution is to use a geospatial database for several reasons.
 
 1. Geospatial databases offer a common data storage format for data in heterogenous and incompatible formats.
 
