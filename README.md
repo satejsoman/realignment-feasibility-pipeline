@@ -27,15 +27,27 @@ Finally, an EMR job is spun up to hydrate each table. For each country in our da
 
 #### Querying Stage
 
-Granted, multiple packages exist to make the entire Lambda process much more streamlined. However, a major limitation of packages like `pywren` at time of writing is the inflexibility 
+Because there was very little state 
+
+```Python
+def is_feasible(block: shapely.geometry.Polygon, buildings: Sequence[shapely.geometry.Polygon]) -> bool:
+    min_area_rects = (list(p.minimum_rotated_rectangle.exterior.coords) for p in buildings)
+    return block.length > sum(min(shapely.geometry.LineString(rectangle[i:i+2]).length for i in range(len(rectangle)-1)) for rectangle in min_area_rects)
+```
 
 However, two constraints make the use of the `boto` API the better choice.
 
-1. *VPC firewalls.* Despite setting out-of-band permissions on the database by adding firewall setting entries, I was unable to make database connections from `pywren` calls to my RDS instance. With a manually-specified Lambda, VPC configurations and IAM roles can be configured with greater flexibility, as was needed in this proejct.
+1. *VPC firewalls.* Despite setting out-of-band permissions on the database by adding firewall setting entries, I was unable to make database connections from `pywren` calls to my RDS instance. With a manually-specified Lambda, VPC configurations and IAM roles can be configured with greater flexibility, as was needed in this project. Specifically, I had to add the `AWSLambdaVPCAccessExecutionRole` to my Lambda to get RDS calls to work.
 
 2. *C-runtime dependencies not included in the basic AWS Python SDK.* Both the database driver code and the client-side geospatial analysis code depend on C/C++ libraries (`SQLAlchemy` and `GDAL`, respectively.) The default environment hard-coded into `pywren` limits users to a runtime that does not support these C/C++ dependencies. By uploading a dependencies zip through the AWS management console, we can manually bundle in the dependencies needed to run our Lambda code.
 
 ### Results
+The below is an analysis of every street block in Freetown, Sierra Leone. The red blocks indicate areas where further infrastructure investment is necessary, as there is insufficient street length to provide direct access to every enclosed building.
+
+![](./img/freetown.png)
+
+I hope to apply this analysis to countries with different land-use density profiles, such as Lesotho and Nairobi, in the future.
+
 
 ### Resources
 - https://stackoverflow.com/questions/34758338/how-to-populate-a-postgresql-database-with-mrjob-and-hadoop
