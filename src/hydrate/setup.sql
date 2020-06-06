@@ -20,10 +20,4 @@ SELECT exec('ALTER TABLE ' || quote_ident(s.nspname) || '.' || quote_ident(s.rel
 s; 
 
 -- test 
-select topology.createtopology('my_new_topo',26986,0.5);
-
--- make like a carpenter and build some tables 
-create table blocks; 
-create table buildings;
-
--- set up geospatial indices 
+select topology.createtopology('my_new_topo', 26986, 0.5);
