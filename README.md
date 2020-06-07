@@ -5,9 +5,9 @@
 <h4 align="center"><i>Heuristics for Targeted Urban Infrastructure Investment</i></h4>
 
 ### Background 
-Community-driven infrastructure investment in the developing world has focused on reacting to deficits in the formal physical infrastructure by implementing in-situ upgrades (e.g. moving buildings within existing street blocks, or creating informal paths to increase the access of inhabitants to formal infrastructure). However, this approach has limits in cases where the formal infrastructure (roads, power, sewage, sanitation, etc.) is insufficiently developed to provide for an adequate quality of life. In these cases, it is useful to have a heuristic to distinguish between blocks in which in-situ approaches are appropriate and those in which further formal investment is needed.
+Community-driven infrastructure investment in the developing world has focused on reacting to deficits in the formal physical infrastructure by implementing in-situ upgrades (e.g. moving buildings within existing street blocks, or creating informal paths to increase the access of inhabitants to formal infrastructure). However, this approach has limits in cases where the formal infrastructure (roads, power, sewage, sanitation, etc). is insufficiently developed to provide for an adequate quality of life. In these cases, it is useful to have a heuristic to distinguish between blocks in which in-situ approaches are appropriate and those in which further formal investment is needed.
 
-One potential heuristic is per-block building capacity. In short, if all the buildings in a block can be aligned to the edges of a street block, there is enough physical space in the block to provide formal infrastructure needs for the inhabitants of the enclosed buildings. To calculate this, we sum the maximum linear dimension of each building footprint and consider a block a candidate for infrastructure investment if this sum exceeds the perimeter of the enclosing street block.
+One potential heuristic is per-block building capacity. In short, if all the buildings in a block can be aligned to the edges of a street block, there is enough physical space in the block to provide formal infrastructure needs for the inhabitants of the enclosed buildings. To calculate this, we sum the minimum linear dimension of each building footprint and consider a block a candidate for infrastructure investment if this sum exceeds the perimeter of the enclosing street block.
 
 This calculation, while straightforward in theory, is difficult to implement in practice due to data fragmentation. Building footprints, depending on the source, are available in a number of different geospatial file formats. For example, OpenStreetMap provides downloadable Protocol Buffer files for its geospatial vector layers, while private providers often provide data in the form of an ESRI Shapefile. The block geometry data are in CSV formats with geometry described using the Well-Known Text (WKT) protocol. 
 
@@ -47,7 +47,7 @@ Next, the out-of-band permissions need to be configured by setting the RDS VPC's
 
 ![](./img/vpc.png)
 
-Finally, an EMR job is spun up to hydrate each table. For each country in our dataset, we get a list of S3 filepaths and create a GeoPandas dataframe from each filepath. 
+Finally, an EMR job is spun up to hydrate each table. For each country in our dataset, we get a list of S3 filepaths and create a GeoPandas dataframe from each filepath. This dataframe is then used to append database entries to the relevant table.
 
 #### Querying Stage
 
